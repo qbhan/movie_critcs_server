@@ -18,6 +18,7 @@ try:
     RETURNING movie_id"""
     genres_insert_query = """INSERT INTO movies_genres (movie_id, genre) VALUES (%s, %s)"""
 
+
     # 네이버에서 현재개봉/개봉예정작 받아오기
     current_url = urlopen("https://movie.naver.com/movie/running/current.nhn")
     pre_url = urlopen("https://movie.naver.com/movie/running/premovie.nhn")

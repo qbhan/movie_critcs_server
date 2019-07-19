@@ -9,6 +9,10 @@ class Movie:
         self.date = date
         self.num = num
         self.status = status
+        self.naver_score = 0
+
+    def set_Naver_Score(self, score):
+        self.naver_score = score
 
     def print_info(self):
         print("==========================")
