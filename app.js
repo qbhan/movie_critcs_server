@@ -3,7 +3,13 @@ const bodyParser = require('body-parser')
 const app = express()
 const db = require('./queries')
 const port = 3000
+
+const cors = require('cors');
    
+
+// CORS Policy
+app.use(cors())
+
 
 // DB Connect String
 // var connection = "postgres://postgres:1234@localhost/week4db";
@@ -25,9 +31,13 @@ app.get('/', function(req, res) {
 // app.put('/users/:id', db.updateUser)
 // app.delete('/users/:id', db.deleteUser)
 app.get('/current_movie', db.getCurrentMovie)
-app.get('/pre_movies', db.getPreMovie)
+app.get('/movie/:movie_id', db.getMovie)
+app.get('/pre_movie', db.getPreMovie)
 app.get('/current_movie/:genre', db.getGenreCurrentMovie)
-
+app.get('/movie_order_score', db.getMovieOrderNaverScore)
+app.get('/movie_critic_naver/:movie_id', db.getMovieCriticNaver)
+app.get('/movie_critic_meta/:movie_id', db.getMovieCriticMeta)
+app.get('/movie_critic_tomato/:movie_id', db.getMovieCriticTomato)
 
 // Server
 app.listen(port, () => {
