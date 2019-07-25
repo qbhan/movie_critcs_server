@@ -65,7 +65,7 @@ def getTomato(movie_list):
             try:
                 # tomato_meter_link > span.mop-ratings-wrap__percentage
                 score = bs.find(class_="mop-ratings-wrap__half").find(class_="mop-ratings-wrap__percentage").getText().split()
-                score = score[0]
+                score = int(score[0][:-1])
             except AttributeError:
                 score = None
 
@@ -78,58 +78,69 @@ def getTomato(movie_list):
             # print(shortview)
         else:
             score = None
+            shortview = None
 
         if score:
             movie_info.set_tomato(score)
 
-        # 평론 가져오기
-        review_url = used_url + '/reviews'
-        # print(review_url)
-        # print(review_url)
         review_list = []
-        review = None
-        review_reviewer = None
-        review_full_url = None
-        review_tomato = None
-        try:
-            review_body = BeautifulSoup(urlopen(review_url), 'html.parser')
-            review_body_list = review_body.find(class_="review_table").find_all(class_="row review_table_row")
-            for reviews in review_body_list:
-                if reviews.find(class_="glyphicon glyphicon-star"):
-                    try:
-                        review = " ".join(reviews.find(class_="the_review").getText().split())
-                    except:
-                        review = None
-                    # print(review)
-                    try:
-                        review_full_url = reviews.find(class_="small subtle review-link").find('a').get('href')
-                    except:
-                        review_full_url = None
-                    # print(review_full_url)
-                    try:
-                        review_reviewer = reviews.find(class_="unstyled bold articleLink").getText()
-                    except:
-                        review_reviewer = None
-                    # print(review_reviewer)
-                    try:
-                        if 'fresh' in reviews.find(class_="col-xs-16 review_container").find('div').get('class')[-1]:
-                            review_tomato = 'fresh'
-                        else:
-                            review_tomato = 'rotten'
-                    except:
-                        review_tomato = None
-                    review_list.append((review_reviewer, review, review_tomato, review_full_url))
-
-        except:
+        review_url = None
+        if bs:
+            # 평론 가져오기
+            review_url = used_url + '/reviews'
+            # print(review_url)
+            # print(review_url)
             review_list = []
+            review = None
+            review_reviewer = None
+            review_full_url = None
+            review_tomato = None
+            try:
+                review_body = BeautifulSoup(urlopen(review_url), 'html.parser')
+                print("review opened")
+                review_body_list = review_body.find(class_="review_table").find_all(class_="row review_table_row")
+                print("review body opened")
+                for reviews in review_body_list:
+                    if reviews.find(class_="glyphicon glyphicon-star"):
+                        try:
+                            review = " ".join(reviews.find(class_="the_review").getText().split())
+                        except:
+                            review = None
+                        # print(review)
+                        try:
+                            review_full_url = reviews.find(class_="small subtle review-link").find('a').get('href')
+                        except:
+                            review_full_url = None
+                        # print(review_full_url)
+                        try:
+                            review_reviewer = reviews.find(class_="unstyled bold articleLink").getText()
+                        except:
+                            review_reviewer = None
+                        # print(review_reviewer)
+                        try:
+                            if 'fresh' in reviews.find(class_="col-xs-16 review_container").find('div').get('class')[-1]:
+                                review_tomato = 'fresh'
+                            else:
+                                review_tomato = 'rotten'
+                        except:
+                            review_tomato = None
+                        review_list.append((review_reviewer, review, review_tomato, review_full_url))
+
+            except:
+                review_list = []
 
         # print(score)
-        # print(review_list)
+        #
         # print(review_url)
         movie_info.set_rottentomato(score, review_list, review_url)
-        print(movie_info.tomato)
-        print(movie_info.tomato_critic)
-        print(movie_info.tomato_critic_url)
+        movie_info.set_shortview(shortview)
+        # print(movie_info.title)
+        # print(review_list)
+        print(type(movie_info.tomato))
+        # print(movie_info.short_view)
+        # print(movie_info.tomato)
+        # print(movie_info.tomato_critic)
+        # print(movie_info.tomato_critic_url)
         new_movie_list.append(movie_info)
         # print(score)
         # print(review_list)

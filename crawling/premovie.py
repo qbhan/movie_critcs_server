@@ -76,22 +76,32 @@ def getPreMovie(url):
             except IndexError:
                 casts = ''
 
-            info = li.find(class_="info_txt1").find_all("dd")[0].getText().split()
+            info = "".join(li.find(class_="info_txt1").find_all("dd")[0].getText().split()).split('|')
             print(info)
             count = 0
             genres = ""
             time = ""
             date = ""
-            # if info.count('|') == 2:
-            #     g = info.find('|')
-            #     for x in range(g):
 
+            for j in range(len(info)):
+                if info[j][-1] == '분':
+                    time += info[j]
+                elif info[j][-1] == '봉':
+                    date += info[j]
+                else:
+                    genres += info[j]
             # for j in range(len(info)):
             #     if count == 0:
-            #         if '|' not in info[j]:
+            #         # print(info[j])
+            #         if '분' in info[j]:
+            #             time += info[j]
+            #             count += 2
+            #         elif info[j][-1].isdigit():
+            #             date += info[j]
+            #             count += 2
+            #         elif '|' not in info[j]:
             #             genres += info[j]
             #         else:
-            #             genreList = genres.split(',')
             #             count += 1
             #     elif count == 1:
             #         if '|' not in info[j]:
@@ -104,34 +114,8 @@ def getPreMovie(url):
             #     elif count == 2:
             #         if '|' not in info[j]:
             #             date += info[j]
-            #         else:
-            #             break
             #     else:
             #         break
-            for j in range(len(info)):
-                if count == 0:
-                    if '|' not in info[j]:
-                        if '분' not in info[j]:
-                            genres += info[j]
-                        else:
-                            time += info[j]
-                    else:
-                        count += 1
-                elif count == 1:
-                    if '|' not in info[j]:
-                        if '분' in info[j]:
-                            time += info[j]
-                        else:
-                            date += info[j]
-                    else:
-                        count += 1
-                elif count == 2:
-                    if '|' not in info[j]:
-                        date += info[j]
-                    else:
-                        break
-                else:
-                    break
             print("genres : \t" + genres)
             print("time : \t" + time)
             print("date : \t" + date)
@@ -174,17 +158,32 @@ def getPreMovie(url):
             # print(synopsis_title)
             # print(content)
 
+            try:
+                trailer_url = naver_base_url + movie_bs.find(class_="article").find(class_="section_group section_group_frst").find_all(class_="obj_section")[3].find('li').find('a').get('href')
+            except:
+                trailer_url = None
+            # print(trailer_url)
+            try:
+                trailer_thumbnail = movie_bs.find(class_="article").find(class_="section_group section_group_frst").find_all(class_="obj_section")[2].find(class_="viewer_img").find('img').get('src')
+            except:
+                trailer_thumbnail = None
+
             year = date[0:4]
             parsed_title = title + '_' + year
             movie = Movie(no, resize_img, parsed_title, directors, casts, genres, time, date, 1, critic_list, synopsis_title, content, eng_title, rating)
+            movie.set_trailer(trailer_url, trailer_thumbnail)
+            # print(movie.trailer_url)
+            # print(movie.trailer_thumbnail)
+            # print(movie.trailer_url)
+            # print(movie.trailer_thumbnail)
             # movie.set_metascore(getMetascore(movie))
             movie_list.append(movie)
             no += 1
     return movie_list
 
 
-# url = urlopen("https://movie.naver.com/movie/running/premovie.nhn")
-# pre_list = getPreMovie(url)
+url = urlopen("https://movie.naver.com/movie/running/premovie.nhn")
+pre_list = getPreMovie(url)
 # print(type(pre_list[0].directors), type(pre_list[0].casts), type(pre_list[0].genres))
 # for k in range(len(pre_list)):
 #     pre_list[k].print_info()

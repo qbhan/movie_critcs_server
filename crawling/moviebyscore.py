@@ -9,7 +9,7 @@ from movie import *
 def getMovieByScore(url):
     movielist = []
     naver_base_url = 'https://movie.naver.com'
-    order_score_url = '/movie/sdb/rank/rmovie.nhn?sel=pnt&date=20190720'
+    order_score_url = '/movie/sdb/rank/rmovie.nhn?sel=pnt&date=20190723'
     bs = BeautifulSoup(url, 'html.parser')
     body = bs.body
     target = body.find(class_="list_ranking")
@@ -51,11 +51,11 @@ def getMovieByScore(url):
 
         # 개봉일
         try:
-            mv_date_list = mv_info_spec[3].find_all('a')
+            mv_date_list = mv_info_spec[3].find_all('a')[-2:]
             mv_date = mv_date_list[0].getText() + mv_date_list[1].getText()
         except AttributeError:
             mv_date = None
-        # print(mv_date)
+        print(mv_date)
 
         # 등급
         # content > div.article > div.mv_info_area > div.mv_info > dl > dd:nth-child(8) > p > a:nth-child(1)
@@ -118,6 +118,16 @@ def getMovieByScore(url):
             content = None
         # print(synopsis_title)
         # print(content)
+
+        try:
+            trailer_url = naver_base_url + soup_body.find(class_="article").find(class_="section_group section_group_frst").find_all(class_="obj_section")[3].find('li').find('a').get('href')
+        except:
+            trailer_url = None
+        # print(trailer_url)
+        try:
+            trailer_thumbnail = soup_body.find(class_="article").find(class_="section_group section_group_frst").find_all(class_="obj_section")[2].find(class_="viewer_img").find('img').get('src')
+        except:
+            trailer_thumbnail = None
 
         # 평점 사이트 이동
         # movieEndTabMenu > li:nth-child(5) > a
@@ -192,17 +202,24 @@ def getMovieByScore(url):
 
         year = mv_date[0:4]
         parsed_title = mv_title + '_' + year
-        movie = Movie(no, mv_img, mv_title, mv_director, mv_cast, mv_genre, mv_time, mv_date, -1, critic_list, synopsis_title,
+        movie = Movie(no, mv_img, parsed_title, mv_director, mv_cast, mv_genre, mv_time, mv_date, -1, critic_list, synopsis_title,
                       content, eng_title, rating)
         no += 1
+        movie.set_trailer(trailer_url, trailer_thumbnail)
+        # print(movie.trailer_url)
+        # print(movie.trailer_thumbnail)
         movie.set_naver_score(movie.get_score_average())
         # movie.set_metascore(getMetascore(movie))
         movielist.append(movie)
+        print(movie.title)
     return movielist
 
 
 
 
 
-# url = urlopen("https://movie.naver.com/movie/sdb/rank/rmovie.nhn?sel=pnt&date=20190720")
-# movie_score_list = getMovieByScore(url)
+# base_url = "https://movie.naver.com/movie/sdb/rank/rmovie.nhn?sel=pnt&date=20190723"
+# movie_score_list = []
+# for i in range(1, 2):
+#     print(base_url + "&page=" + str(i))
+#     movie_score_list += getMovieByScore(urlopen(base_url + "&page=" + str(i)))

@@ -8,12 +8,15 @@ from urllib.request import urlopen
 
 current_url = urlopen("https://movie.naver.com/movie/running/current.nhn")
 pre_url = urlopen("https://movie.naver.com/movie/running/premovie.nhn")
-get_score_url = urlopen("https://movie.naver.com/movie/sdb/rank/rmovie.nhn?sel=pnt&date=20190721")
+get_score_base_url = "https://movie.naver.com/movie/sdb/rank/rmovie.nhn?sel=pnt&date=20190723"
+page_url = "&page="
 # movies = getCurrentMovie(current_url) + getPreMovie(pre_url) + getMovieByScore(get_score_url)
 current_movie = getCurrentMovie(current_url)
 pre_movie = getPreMovie(pre_url)
-old_movie = getMovieByScore(get_score_url)
-movies = current_movie + pre_movie + old_movie
+# old_movie = getMovieByScore(get_score_url)
+movies = current_movie + pre_movie
+for i in range(1, 11):
+    movies += getMovieByScore(urlopen(get_score_base_url + page_url + str(i)))
 # print(len(current_movie))
 movies = getTomato(movies)
 movies = getMetascore(movies)
@@ -31,7 +34,7 @@ try:
     # movies_insert_query = """INSERT INTO movies (img, title, directors, casts, genres, time, date, status,
     # naver_score, synopsis_title, synopsis_content) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING
     # movie_id """
-    movies_insert_query = """INSERT INTO movies(img, title, directors, casts, genres, time, date, status, naver_score, synopsis_title, synopsis_content, eng_title, rating, metascore, rottentomato, meta_url, tomato_url) select %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s WHERE NOT EXISTS (SELECT title FROM movies WHERE title = %s) RETURNING movie_id """
+    movies_insert_query = """INSERT INTO movies(img, title, directors, casts, genres, time, date, status, naver_score, synopsis_title, synopsis_content, eng_title, rating, metascore, rottentomato, meta_url, tomato_url, trailer_url, trailer_thumbnail, shortview) select %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s WHERE NOT EXISTS (SELECT title FROM movies WHERE title = %s) RETURNING movie_id """
     genres_insert_query = """INSERT INTO movies_genres (movie_id, genre) VALUES (%s, %s)"""
     naver_insert_query = """INSERT INTO movies_critics (movie_id, name, title, score, content) VALUES (%s, %s, %s, 
     %s, %s) """
@@ -56,7 +59,7 @@ try:
     # insert movies
     for i in range(len(movies)):
         movie_to_insert = (movies[i].image, movies[i].title, movies[i].directors, movies[i].casts, movies[i].genres,
-                           movies[i].time, movies[i].date, movies[i].status, movies[i].naver_score, movies[i].syn_title, movies[i].syn_content, movies[i].eng_title, movies[i].rating, movies[i].metascore, movies[i].tomato, movies[i].meta_critic_url, movies[i].tomato_critic_url, movies[i].title)
+                           movies[i].time, movies[i].date, movies[i].status, movies[i].naver_score, movies[i].syn_title, movies[i].syn_content, movies[i].eng_title, movies[i].rating, movies[i].metascore, movies[i].tomato, movies[i].meta_critic_url, movies[i].tomato_critic_url, movies[i].trailer_url, movies[i].trailer_thumbnail, movies[i].short_view, movies[i].title)
         movies[i].print_info()
         cursor.execute(movies_insert_query, movie_to_insert)
         print("MOVIE SUCCESSFULLY INSERTED")

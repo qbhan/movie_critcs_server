@@ -70,33 +70,44 @@ def getCurrentMovie(url):
         except IndexError:
             casts = ''
 
-        info = list[n].find(class_="info_txt1").find_all("dd")[0].getText().split()
-
+        info = "".join(list[n].find(class_="info_txt1").find_all("dd")[0].getText().split()).split('|')
+        print(info)
         count = 0
         genres = ""
         time = ""
         date = ""
         for j in range(len(info)):
-            if count == 0:
-                if '|' not in info[j]:
-                    genres += info[j]
-                else:
-                    count += 1
-            elif count == 1:
-                if '|' not in info[j]:
-                    if '분' in info[j]:
-                        time += info[j]
-                    else:
-                        date += info[j]
-                else:
-                    count += 1
-            elif count == 2:
-                if '|' not in info[j]:
-                    date += info[j]
-                else:
-                    break
+            if info[j][-1] == '분':
+                time += info[j]
+            elif info[j][-1] == '봉':
+                date += info[j]
             else:
-                break
+                genres += info[j]
+        # for j in range(len(info)):
+        #     if count == 0:
+        #         if '분' in info[j]:
+        #             time += info[j]
+        #             count += 2
+        #         elif info[j].isdigit():
+        #             date += info[j]
+        #             count += 3
+        #         elif '|' not in info[j]:
+        #             genres += info[j]
+        #         else:
+        #             count += 1
+        #     elif count == 1:
+        #         if '|' not in info[j]:
+        #             if '분' in info[j]:
+        #                 time += info[j]
+        #             else:
+        #                 date += info[j]
+        #         else:
+        #             count += 1
+        #     elif count == 2:
+        #         if '|' not in info[j]:
+        #             date += info[j]
+        #     else:
+        #         break
 
         score_url = urlopen(naver_base_url + list[n].find(class_="star").find("a").get('href').split('#')[0])
         # print(naver_base_url + list[n].find(class_="star").find("a").get('href').split('#')[0])
@@ -196,11 +207,31 @@ def getCurrentMovie(url):
             content = None
         # print(content)
         # print(critic_list)
+        print(genres, time, date)
         year = date[0:4]
         parsed_title = title + '_' + year
+
+        # content > div.article > div.section_group.section_group_frst > div:nth-child(4) > div > ul > li:nth-child(1)
+        try:
+            trailer_url = naver_base_url + movie_bs.find(class_="article").find(class_="section_group section_group_frst").find_all(class_="obj_section")[3].find('li').find('a').get('href')
+        except:
+            trailer_url = None
+        # print(trailer_url)
+        try:
+            trailer_thumbnail = movie_bs.find(class_="article").find(class_="section_group section_group_frst").find_all(class_="obj_section")[2].find(class_="viewer_img").find('img').get('src')
+        except:
+            trailer_thumbnail = None
+        # print(trailer_thumbnail)
+
         movie = Movie(no, resize_img, parsed_title, directors, casts, genres, time, date, 0, critic_list, synopsis_title, content, eng_title, rating)
         no += 1
         # print(movie.image)
+        # print(trailer_url)
+        # print(trailer_thumbnail)
+        movie.set_trailer(trailer_url, trailer_thumbnail)
+        # print(movie.trailer_url)
+        # print(movie.trailer_thumbnail)
+        # print(movie.title)
         movie.set_naver_score(movie.get_score_average())
         # movie.set_metascore(getMetascore(movie))
         # getTomato(movie)
@@ -213,7 +244,7 @@ def getCurrentMovie(url):
 
 
 
-# url = urlopen("https://movie.naver.com/movie/running/current.nhn")
-# current_list = getCurrentMovie(url)
+url = urlopen("https://movie.naver.com/movie/running/current.nhn")
+current_list = getCurrentMovie(url)
 # # getTomato(current_list)
 # getMetascore(current_list)

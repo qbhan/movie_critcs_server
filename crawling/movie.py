@@ -24,6 +24,16 @@ class Movie:
         self.syn_content = syn_content
         self.eng_title = eng_title
         self.rating = rating
+        self.trailer_url = None
+        self.trailer_thumbnail = None
+        self.short_view = None
+
+    def set_shortview(self, shortview):
+        self.short_view = shortview
+
+    def set_trailer(self, url, thumbnail):
+        self.trailer_url = url
+        self.trailer_thumbnail = thumbnail
 
     def set_naver_score(self, score):
         self.naver_score = score

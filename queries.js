@@ -41,9 +41,50 @@ const getPreMovie = (req, res) => {
 
 
 // 특정 장르인 현재개봉영화
-const getGenreCurrentMovie = (req, res) => {
+const getGenreMovie = (req, res) => {
   const genre = String(req.params.genre)
-  pool.query("SELECT * FROM movies WHERE status = '0' AND movies.genres ~ $1 ORDER BY movie_id ASC", [genre], (error, results) => {
+  pool.query("SELECT * FROM movies WHERE movies.genres ~ $1 ORDER BY movie_id ASC", [genre], (error, results) => {
+    if (error) {
+      throw error
+    }
+    res.status(200).json(results.rows)
+  })
+}
+
+const getGenresMovie = (req, res) => {
+  const genre1 = String(req.params.genre1)
+  const genre2 = String(req.params.genre2)
+  pool.query("SELECT * FROM movies WHERE genres ~ $1 OR genres ~ $2 ORDER BY movie_id ASC", [genre1, genre2], (error, results) => {
+    if (error) {
+      throw error
+    }
+    res.status(200).json(results.rows)
+  })
+}
+
+const getMovieTitle = (req, res) => {
+  const title = String(req.params.title)
+  pool.query("SELECT * FROM movies WHERE title ~ $1 ORDER BY movie_id ASC", [title], (error, results) => {
+    if (error) {
+      throw error
+    }
+    res.status(200).json(results.rows)
+  })
+}
+
+const getMovieDirector = (req, res) => {
+  const director = String(req.params.director)
+  pool.query("SELECT * FROM movies WHERE directors ~ $1 ORDER BY movie_id ASC", [director], (error, results) => {
+    if (error) {
+      throw error
+    }
+    res.status(200).json(results.rows)
+  })
+}
+
+const getMovieCast = (req, res) => {
+  const cast = String(req.params.cast)
+  pool.query("SELECT * FROM movies WHERE casts ~ $1 ORDER BY movie_id ASC", [cast], (error, results) => {
     if (error) {
       throw error
     }
@@ -52,8 +93,8 @@ const getGenreCurrentMovie = (req, res) => {
 }
 
 //네이버 평점 순서
-const getMovieOrderNaverScore = (req, res) => {
-  pool.query("SELECT * FROM movies WHERE naver_score IS NOT NULL ORDER BY naver_score DESC", (error, results) => {
+const getMovieOrderScore = (req, res) => {
+  pool.query("SELECT * FROM movies WHERE (naver_score >= 7.5 and metascore >= 80) or (naver_score >= 7.5 and rottentomato >= 80) or (metascore >= 80 and rottentomato >= 80) ORDER BY naver_score DESC", (error, results) => {
     if (error) {
       throw error
     }
@@ -61,10 +102,21 @@ const getMovieOrderNaverScore = (req, res) => {
   })
 }
 
-//해당 영화 네이버 평론 가져오기
+//해당 영화 네이버 기자 평론 가져오기
+const getMovieReportNaver = (req, res) => {
+  const movie_id = String(req.params.movie_id)
+  pool.query("SELECT * FROM movies_critics WHERE movie_id = $1 AND content IS NOT NULL", [movie_id], (error, results) => {
+    if (error) {
+      throw error
+    }
+    res.status(200).json(results.rows)
+  })
+}
+
+//해당 영화 네이버 일반 평론 가져오기
 const getMovieCriticNaver = (req, res) => {
   const movie_id = String(req.params.movie_id)
-  pool.query("SELECT * FROM movies_critics WHERE movie_id = $1", [movie_id], (error, results) => {
+  pool.query("SELECT * FROM movies_critics WHERE movie_id = $1 AND content IS NULL", [movie_id], (error, results) => {
     if (error) {
       throw error
     }
@@ -93,63 +145,21 @@ const getMovieCriticTomato = (req, res) => {
 }
 
 
-// //POST a new user
-// const createUser = (req, res) => {
-//   const { name, phone_number } = req.body
+const getMovieCertified = (req, res) => {
 
-//   pool.query('INSERT INTO contacts (contact_name, phone_number) VALUES ($1, $2)', 
-//   	[name, phone_number], (error, results) => {
-//     if (error) {
-//       throw error
-//     }
-//     res.status(201).send(`User added with ID: ${results.insertId}`)
-//   })
-// }
-
-// // POST existing user
-// const loginUser = (req, res) => {
-// 	const { name, }
-
-// 	pool.query('SELECT password FROM users WHERE ')
-// }
-
-
-// //PUT updated data in an existing user
-
-// const updateUser = (req, res) => {
-//   const id = parseInt(req.params.id)
-//   const { name, phone_number } = req.body
-
-//   pool.query(
-//     'UPDATE contacts SET contact_name = $1, phone_number = $2 WHERE id = $3',
-//     [name, phone_number, id],
-//     (error, results) => {
-//       if (error) {
-//         throw error
-//       }
-//       res.status(200).send(`User modified with ID: ${id}`)
-//     }
-//   )
-// }
-
-// //DELETE a user
-// const deleteUser = (req, res) => {
-//   const id = parseInt(req.params.id)
-
-//   pool.query('DELETE FROM contacts WHERE id = $1', [id], (error, results) => {
-//     if (error) {
-//       throw error
-//     }
-//     res.status(200).send(`User deleted with ID: ${id}`)
-//   })
-// }
+}
 
 module.exports = {
   getCurrentMovie,
   getMovie,
   getPreMovie,
-  getGenreCurrentMovie,
-  getMovieOrderNaverScore,
+  getGenreMovie,
+  getGenresMovie,
+  getMovieTitle,
+  getMovieDirector,
+  getMovieCast,
+  getMovieOrderScore,
+  getMovieReportNaver,
   getMovieCriticNaver,
   getMovieCriticMeta, 
   getMovieCriticTomato,

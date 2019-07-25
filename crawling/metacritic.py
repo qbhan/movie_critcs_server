@@ -66,7 +66,11 @@ def getMetascore(movie_list):
         review_list = []
         if body:
             try:
-                score = body.find(class_="movie product summary").find(class_="content_under_header").find(class_="metascore_anchor").find('span').getText()
+                score_str = body.find(class_="movie product summary").find(class_="content_under_header").find(class_="metascore_anchor").find('span').getText()
+                if score_str[-1].isdigit():
+                    score = int(score_str)
+                else:
+                    score = None
             except AttributeError:
                 score = None
 
@@ -105,9 +109,9 @@ def getMetascore(movie_list):
         # if score:
         #     movie_info.set_metascore(score)
         movie_info.set_metacritic(score, review_list, used_url)
-        print(movie_info.metascore)
-        print(movie_info.meta_critic)
-        print(movie_info.meta_critic_url)
+        print(type(movie_info.metascore))
+        # print(movie_info.meta_critic)
+        # print(movie_info.meta_critic_url)
         new_movie_list.append(movie_info)
     return new_movie_list
 
